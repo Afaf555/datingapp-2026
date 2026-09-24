@@ -8,7 +8,7 @@ public class Photo
     public string? PublicId { get; set; }
 
     [JsonIgnore]
-    public Member Member {get; set;}=null!; //ova e vrska do drug entitet (member)
+public Member Member {get; set;}=null!; //ova e vrska do drug entitet (member)
     public string MemberId {get; set;}=null!;
 
 }
