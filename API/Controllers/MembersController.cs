@@ -9,6 +9,7 @@ using API.DTOs;
 using System.Security.Claims;
 using API.Extensions;
 using API.Services;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -16,9 +17,9 @@ namespace API.Controllers
     public class MembersController(IMemberRepository memberRepository,IPhotoService photoService) : BaseApiController
     {
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
-        {
-            return Ok(await memberRepository.GetMembersAsync());
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery]MemberParams memberParams)
+        {   memberParams.CurrentMemberId=User.GetMemberId();
+            return Ok(await memberRepository.GetMembersAsync(memberParams));
         }
         [Authorize]
 
@@ -33,6 +34,7 @@ namespace API.Controllers
         [HttpGet("{id}/photos")]
         public async Task<ActionResult<IReadOnlyList<Photo>>> GetMemberPhotos(string id)
         {
+            
             return Ok(await memberRepository.GetPhotosForMemberAsync(id));
         }
 
