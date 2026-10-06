@@ -4,7 +4,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { NgClass } from '@angular/common';
 
 @Component({
-  imports: [Nav, RouterOutlet,NgClass],
+  imports: [Nav, RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

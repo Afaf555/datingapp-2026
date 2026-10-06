@@ -10,7 +10,7 @@ import { StarButton } from '../../../shared/star-button/star-button';
 import { DeleteButton } from '../../../shared/delete-button/delete-button';
 
 @Component({
-  imports: [AsyncPipe, ImageUpload, StarButton, DeleteButton],
+  imports: [ImageUpload, StarButton, DeleteButton],
   selector: 'app-member-photo',
   styleUrl: './member-photo.css',
   templateUrl: './member-photo.html',

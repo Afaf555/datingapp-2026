@@ -8,7 +8,7 @@ import { Paginator } from '../../../shared/paginator/paginator';
 import { FilterModal } from '../filter-modal/filter-modal';
 
 @Component({
-  imports: [AsyncPipe, MemberCard, Paginator, FilterModal],
+  imports: [MemberCard, Paginator, FilterModal],
   selector: 'app-member-list',
   styleUrl: './member-list.css',
   templateUrl: './member-list.html',
