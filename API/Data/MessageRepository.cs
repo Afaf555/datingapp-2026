@@ -33,8 +33,8 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
     public async Task<Group?> GetGroupForConnection(string connectionId)
     {
         return await context.Groups
-        .Include(x=>x.Connections)
-        .Where(x=>x.Connections.Any(c=>c.ConnectionId==connectionId))
+        .Include(x => x.Connections)
+        .Where(x => x.Connections.Any(c => c.ConnectionId == connectionId))
         .FirstOrDefaultAsync();
     }
 
@@ -46,12 +46,11 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
     public async Task<Group?> GetMessageGroup(string groupName)
     {
         return await context.Groups
-        .Include(x=>x.Connections)
-        .FirstOrDefaultAsync(x=>x.Name==groupName);
+        .Include(x => x.Connections)
+        .FirstOrDefaultAsync(x => x.Name == groupName);
     }
 
-    public async Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParams
-        messageParams)
+    public async Task<PaginatedResult<MessageDto>> GetMessagesForMember(MessageParams messageParams)
     {
         var query = context.Messages
             .OrderByDescending(x => x.MessageSent)
@@ -59,14 +58,13 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
 
         query = messageParams.Container switch
         {
-            "Outbox" => query.Where(x => x.SenderId == messageParams.MemberId),
-            _ => query.Where(x => x.RecipientId == messageParams.MemberId)
+            "Outbox" => query.Where(x => x.SenderId == messageParams.MemberId && !x.SenderDeleted),
+            _ => query.Where(x => x.RecipientId == messageParams.MemberId && !x.RecipientDeleted)
         };
 
         var messageQuery = query.Select(MessageExtensions.ToDtoProjection());
 
-        return await PaginationHelper.CreateAsync(messageQuery, messageParams.PageNumber,
-            messageParams.PageSize);
+        return await PaginationHelper.CreateAsync(messageQuery, messageParams.PageNumber, messageParams.PageSize);
     }
 
     public async Task<IReadOnlyList<MessageDto>> GetMessageThread(string currentMemberId, string recipientId)
@@ -78,22 +76,19 @@ public class MessageRepository(AppDbContext context) : IMessageRepository
                 .SetProperty(x => x.DateRead, DateTime.UtcNow));
 
         return await context.Messages
-            .Where(x => (x.RecipientId == currentMemberId && x.SenderId == recipientId)
-                || (x.SenderId == currentMemberId && x.RecipientId == recipientId))
-            .OrderBy(x => x.MessageSent)
-            .Select(MessageExtensions.ToDtoProjection())
-            .ToListAsync();
+    .Where(x => (x.RecipientId == currentMemberId && x.SenderId == recipientId && !x.RecipientDeleted)
+             || (x.SenderId == currentMemberId && x.RecipientId == recipientId && !x.SenderDeleted))
+    .OrderBy(x => x.MessageSent)
+    .Select(MessageExtensions.ToDtoProjection())
+    .ToListAsync();
     }
 
     public async Task RemoveConnection(string connectionId)
     {
         await context.Connections
-        .Where(x=>x.ConnectionId==connectionId)
+        .Where(x => x.ConnectionId == connectionId)
         .ExecuteDeleteAsync();
     }
 
-    public async Task<bool> SaveAllAsync()
-    {
-        return await context.SaveChangesAsync() > 0;
-    }
+
 }

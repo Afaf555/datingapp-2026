@@ -4,7 +4,6 @@ import { LoginCreds, RegisterCreds, User } from '../../types/user';
 import { tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LikesService } from './likes-service';
-import { clearHttpCache } from '../interceptors/loading-interceptor';
 import { MemberService } from './member-service'
 import { PresenceService } from './presence-service';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
@@ -73,13 +72,15 @@ export class AccountService {
 
     }
     logout() {
-        localStorage.removeItem('filters');
-        // clearHttpCache();
-        this.likesService.clearLikeIds();
-        // this.memberService.member.set(null);
-        // this.memberService.editMode.set(false);
-        this.currentUser.set(null);
-        this.presenceService.stopHubConnection();
+        this.http.post(this.baseUrl + 'account/logout', {}, { withCredentials: true }).subscribe({
+            next: () => {
+                localStorage.removeItem('filters');
+                this.likesService.clearLikeIds();
+                this.currentUser.set(null);
+                this.presenceService.stopHubConnection();
+            }
+        })
+
     }
 
     private getRolesFromToken(user: User): string[] {
